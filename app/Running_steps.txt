@@ -1,0 +1,2 @@
+step 1: activate the myenv : source myenv/bin/activate                 
+step 2 : run the project : python app/app.py
