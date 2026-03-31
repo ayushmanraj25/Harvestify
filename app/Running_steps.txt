@@ -10,3 +10,19 @@ EMPTY commit for streak
 
 git commit --allow-empty -m "Daily streak"
 git push origin main
+
+
+
+commit with changes 
+
+🔹 1. Check changes
+git status
+
+🔹 2. Add all changes
+git add .
+
+🔹 3. Commit changes
+git commit -m "comments"
+
+🔹 4. Push to GitHub
+git push origin main

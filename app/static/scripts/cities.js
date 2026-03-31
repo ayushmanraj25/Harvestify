@@ -48,7 +48,6 @@ function print_state(state_id){
 		option_str.options[option_str.length] = new Option(state_arr[i],state_arr[i]);
 	}
 }
-
 function print_city(city_id, city_index){
 	var option_str = document.getElementById(city_id);
 	option_str.length=0;	// Fixed by Julian Woods

@@ -43,19 +43,34 @@
 					</select>
 				</div>
 
-				<!-- Temperature -->
+				 <!-- Temperature 
 				<div class="form-group">
 					<label>Temperature (°C)</label>
 					<input class="form-control" type="number" step="any"
 						name="temperature" placeholder="e.g 30" required>
 				</div>
 
-				<!-- Rainfall -->
+				 Rainfall 
 				<div class="form-group">
 					<label>Rainfall (mm)</label>
 					<input class="form-control" type="number" step="any"
 						name="rainfall" placeholder="e.g 100" required>
-				</div>
+				</div> -->
+
+				<!-- STATE -->
+<div class="form-group">
+	<label>State</label>
+	<select onchange="print_city('city', this.selectedIndex);" 
+			id="state" class="form-control" required>
+	</select>
+</div>
+
+<!-- CITY -->
+<div class="form-group">
+	<label>City</label>
+	<select id="city" name="city" class="form-control" required>
+	</select>
+</div>
 
 				<!-- Soil Moisture -->
 				<div class="form-group">
@@ -63,6 +78,8 @@
 					<input class="form-control" type="number" step="any"
 						name="moisture" placeholder="e.g 30" required>
 				</div>
+
+	
 
 			</div>
 
@@ -75,4 +92,12 @@
 		</form>
 	</div>
 </section>
+
+{% block scripts %}
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		print_state("state");   // 🔥 states auto load
+	});
+</script>
+{% endblock %}
 {% endblock %}

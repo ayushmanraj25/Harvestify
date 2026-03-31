@@ -102,6 +102,31 @@ irrigation_columns = pickle.load(open('models/irrigation_columns.pkl', 'rb'))
 
 import requests
 
+def get_weather(city):
+    api_key = "ad6e51a0d43036d443635d75adb339a8"
+
+    city = city + ",IN"   # 🔥 IMPORTANT FIX
+
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+
+    response = requests.get(url).json()
+
+    print("City:", city)
+    print("Response:", response)
+
+    # error handling
+    if response.get("cod") != 200:
+        print("API Error:", response)
+        return 30, 50, 0   # fallback
+
+    temp = response['main']['temp']
+    humidity = response['main']['humidity']
+    rainfall = response.get('rain', {}).get('1h', 0)
+
+    return temp, humidity, rainfall
+
+import requests
+
 def weather_fetch(city_name):
     """
     Fetch and returns the temperature and humidity of a city
@@ -401,16 +426,16 @@ def production_predict():
 def irrigation_predict():
     title = 'Harvestify - Irrigation Result'
 
-    # Get form data
+    # ------------------ USER INPUT ------------------
     crop = request.form['crop']
     soil = request.form['soil']
-    temp = float(request.form['temperature'])
-    rainfall = float(request.form['rainfall'])
+    city = request.form['city']
     moisture = float(request.form['moisture'])
 
-    # ------------------ ML PREDICTION (FIXED) ------------------
+    # ------------------ WEATHER API ------------------
+    temp, humidity, rainfall = get_weather(city)
 
-    # dynamic input (no hardcoding)
+    # ------------------ ML INPUT ------------------
     input_data = pd.DataFrame([{
         'Temperature': temp,
         'Rainfall': rainfall,
@@ -419,21 +444,19 @@ def irrigation_predict():
         'Soil_' + soil: 1
     }])
 
-    # align with training columns (IMPORTANT 🔥)
+    # align with training columns
     input_data = input_data.reindex(columns=irrigation_columns, fill_value=0)
 
-    # prediction
+    # ------------------ PREDICTION ------------------
     water_needed = irrigation_model.predict(input_data)[0]
 
     # ------------------ SOIL ADJUSTMENT ------------------
-
     if soil == "Sandy":
         water_needed += 50
     elif soil == "Clay":
         water_needed -= 30
 
     # ------------------ SCHEDULING ------------------
-
     if crop == "Rice":
         schedule = "Daily irrigation required"
     elif crop == "Wheat":
@@ -442,7 +465,6 @@ def irrigation_predict():
         schedule = "Irrigate every 3-5 days"
 
     # ------------------ METHOD ------------------
-
     if crop in ["Cotton", "Sugarcane"]:
         method = "Drip irrigation recommended"
     elif crop == "Rice":
@@ -450,26 +472,30 @@ def irrigation_predict():
     else:
         method = "Sprinkler irrigation recommended"
 
-    # ------------------ AI LOGIC ------------------
-
-    if moisture < 30:
-        ai_advice = "Irrigate immediately (within 12 hours)"
-    elif rainfall > 100:
-        ai_advice = "Rain expected, skip irrigation"
+    # ------------------ SMART AI LOGIC ------------------
+    if rainfall > 50:
+        ai_advice = "Heavy rain expected , skip irrigation"
+    elif humidity > 80:
+        ai_advice = "High humidity , reduce irrigation"
+    elif moisture < 30:
+        ai_advice = "Soil dry , irrigate immediately (within 12 hours)"
     elif temp > 35:
-        ai_advice = "High temperature, increase irrigation slightly"
+        ai_advice = "High temperature , increase irrigation slightly"
     else:
-        ai_advice = "Irrigation not urgently required"
+        ai_advice = "Conditions normal , follow recommended schedule"
 
+    # ------------------ RETURN ------------------
     return render_template(
         'irrigation-result.html',
         water=round(water_needed, 2),
         schedule=schedule,
         method=method,
         ai_advice=ai_advice,
+        temp=round(temp, 1),
+        rainfall=round(rainfall, 1),
+        humidity=round(humidity, 1),
         title=title
     )
-    
 # ===============================================================================================
 '''if __name__ == '__main__':
     app.run(debug=True)'''
