@@ -1,2 +1,12 @@
 step 1: activate the myenv : source myenv/bin/activate                 
 step 2 : run the project : python app/app.py
+
+
+after doing changes make sure to create a fresh requirements.txt
+run only command : pip freeze > requirements.txt
+
+
+EMPTY commit for streak
+
+git commit --allow-empty -m "Daily streak"
+git push origin main

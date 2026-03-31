@@ -56,6 +56,9 @@
 						<li class="nav-item {% if 'yield' in request.endpoint %}active{% endif %}">
 							<a class="nav-link" href="{{ url_for('Production_prediction') }}">Production</a>
 						</li>
+						<li class="nav-item {% if 'irrigation' in request.endpoint %}active{% endif %}">
+							<a class="nav-link" href="{{ url_for('irrigation_page') }}">Irrigation</a>
+						</li>
 
 						<li class="nav-item d-none d-lg-block">
 							<a class="btn btn-success ml-lg-3 px-4" href="{{ url_for('crop_recommend') }}">Get Started</a>
@@ -86,7 +89,7 @@
 	<footer class="app-footer py-5">
 		<div class="container text-center">
 			<p class="mb-1 font-weight-semibold">Harvestify</p>
-			<p class="mb-2 text-muted">Made with care by Jay</p>
+			<p class="mb-2 text-muted">Made with ayushman</p>
 			<small class="text-muted">&copy; {{ current_year if current_year is defined else '2025' }} Harvestify. All
 				rights reserved.</small>
 		</div>

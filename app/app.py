@@ -1,6 +1,5 @@
 # Importing essential libraries and modules
 
-#from flask import Flask, render_template, request, Markup
 from flask import Flask, render_template, request
 from markupsafe import Markup
 import numpy as np
@@ -15,11 +14,8 @@ import os
 import torch
 from torchvision import transforms
 from PIL import Image
-from utils.model import ResNet9   
-
-
-
-# ==============================================================================================
+from utils.model import ResNet9  
+ 
 
 # -------------------------LOADING THE TRAINED MODELS -----------------------------------------------
 
@@ -95,10 +91,11 @@ fertilizer_df = pd.read_csv('Data-raw/fertilizer.csv')
 production_model_path = 'models/production_pipeline.pkl'
 production_model = pickle.load(open(production_model_path, 'rb'))
 
+# ✅ ADD THIS HERE
+irrigation_model = pickle.load(open('models/irrigation_model.pkl', 'rb'))
+# load columns (VERY IMPORTANT)
+irrigation_columns = pickle.load(open('models/irrigation_columns.pkl', 'rb'))
 
-
-
-# =========================================================================================
 
 # Custom functions for calculations
 
@@ -126,7 +123,6 @@ def weather_fetch(city_name):
         return temperature, humidity
     else:
         return None
-
 
 
 def predict_image(img, model=disease_model):
@@ -234,15 +230,12 @@ def get_fertilizer_advice(N, P, K, pH, crop_name):
     except Exception as e:
         return {"error": f"Prediction error: {str(e)}"}
 
-
-# ===============================================================================================
 # ------------------------------------ FLASK APP -------------------------------------------------
 
 
 app = Flask(__name__)
 
 # render home page
-
 
 @ app.route('/')
 def home():
@@ -269,12 +262,14 @@ def fertilizer_recommendation():
 @app.route('/Production')
 def Production_prediction():
     return render_template('production.html')
+
+# render irrigation page
+@app.route('/irrigation')
+def irrigation_page():
+    title = 'Harvestify - Irrigation Suggestion'
+    return render_template('irrigation.html', title=title)
 # render disease prediction input page
 
-
-
-
-# ===============================================================================================
 
 # RENDER PREDICTION PAGES
 
@@ -308,7 +303,6 @@ def crop_prediction():
             return render_template('try_again.html', title=title)
 
 
-
 # render fertilizer recommendation form page
 '''@app.route('/fertilizer')
     def fertilizer_recommendation():
@@ -339,8 +333,6 @@ def fert_recommend():
                          advice=result["advice"],
                          title=title)
 
-
-            
 
     # return render_template('fertilizer-result.html', recommendation=response, title=title)
 
@@ -402,8 +394,82 @@ def production_predict():
         prediction=round(prediction, 2),
         title=title
     )
+    
+    # ===================== IRRIGATION PREDICTION =====================
 
+@app.route('/irrigation-predict', methods=['POST'])
+def irrigation_predict():
+    title = 'Harvestify - Irrigation Result'
 
+    # Get form data
+    crop = request.form['crop']
+    soil = request.form['soil']
+    temp = float(request.form['temperature'])
+    rainfall = float(request.form['rainfall'])
+    moisture = float(request.form['moisture'])
+
+    # ------------------ ML PREDICTION (FIXED) ------------------
+
+    # dynamic input (no hardcoding)
+    input_data = pd.DataFrame([{
+        'Temperature': temp,
+        'Rainfall': rainfall,
+        'Moisture': moisture,
+        'Crop_' + crop: 1,
+        'Soil_' + soil: 1
+    }])
+
+    # align with training columns (IMPORTANT 🔥)
+    input_data = input_data.reindex(columns=irrigation_columns, fill_value=0)
+
+    # prediction
+    water_needed = irrigation_model.predict(input_data)[0]
+
+    # ------------------ SOIL ADJUSTMENT ------------------
+
+    if soil == "Sandy":
+        water_needed += 50
+    elif soil == "Clay":
+        water_needed -= 30
+
+    # ------------------ SCHEDULING ------------------
+
+    if crop == "Rice":
+        schedule = "Daily irrigation required"
+    elif crop == "Wheat":
+        schedule = "Irrigate every 5-7 days"
+    else:
+        schedule = "Irrigate every 3-5 days"
+
+    # ------------------ METHOD ------------------
+
+    if crop in ["Cotton", "Sugarcane"]:
+        method = "Drip irrigation recommended"
+    elif crop == "Rice":
+        method = "Flood irrigation recommended"
+    else:
+        method = "Sprinkler irrigation recommended"
+
+    # ------------------ AI LOGIC ------------------
+
+    if moisture < 30:
+        ai_advice = "Irrigate immediately (within 12 hours)"
+    elif rainfall > 100:
+        ai_advice = "Rain expected, skip irrigation"
+    elif temp > 35:
+        ai_advice = "High temperature, increase irrigation slightly"
+    else:
+        ai_advice = "Irrigation not urgently required"
+
+    return render_template(
+        'irrigation-result.html',
+        water=round(water_needed, 2),
+        schedule=schedule,
+        method=method,
+        ai_advice=ai_advice,
+        title=title
+    )
+    
 # ===============================================================================================
 '''if __name__ == '__main__':
     app.run(debug=True)'''

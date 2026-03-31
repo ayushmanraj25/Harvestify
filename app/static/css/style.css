@@ -2014,3 +2014,40 @@ main.container{ padding-top: 2rem; padding-bottom: 2rem; }
 }
 
 /*-- //Responsive design --*/
+
+.hover-lift {
+    transition: all 0.3s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+.hover-scale {
+    transition: transform 0.2s ease;
+}
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}

@@ -1,0 +1,11 @@
+Crop,Soil,Temperature,Rainfall,Moisture,Water
+Rice,Clay,30,200,40,500
+Wheat,Loamy,25,100,30,400
+Maize,Sandy,35,50,20,450
+Cotton,Sandy,32,80,25,350
+Sugarcane,Loamy,28,120,35,480
+Rice,Sandy,33,180,30,520
+Wheat,Clay,20,90,40,380
+Maize,Loamy,34,60,25,430
+Cotton,Loamy,30,70,30,360
+Sugarcane,Clay,27,110,45,5001
